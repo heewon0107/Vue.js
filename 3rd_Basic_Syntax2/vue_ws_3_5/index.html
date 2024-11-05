@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+	<style>
+    li {
+      padding: 10px;
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      background-color: #f5f5f5;
+    }
+    .cheap {
+      background-color: #e1f7e1;
+    }
+    .expensive {
+      background-color: #f7e1e1;
+    }
+    .selected {
+      background-color: #ffc;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <div id="app">
+    <h1>다양한 전시 정보</h1>
+    <h2 v-show="selectedInfos.length > 0">관람 예정인 전시 : {{selectedInfos.join(', ')}}</h2>
+    <h2 v-show="selectedInfos.length === 0"> 관람 예정인 전시가 업슴니다.</h2>
+    <p>예상 총 금액 : {{totalPrice}} </p>
+
+    <ul v-for="article in isActiveExhibition" :key="article">
+      <!-- <li :class="setcolor(article.price, article.isSelected)"> -->
+      <li :class="{cheap: article.price <= 5000, expensive:article.price >= 20000, selected:article.isSelected}">
+
+        <div v-if="article.isOpen">
+          <span>전시 관람하기</span>
+          <input type="checkbox" id="isActive" v-model="article.isSelected">
+        </div>
+        <div v-else style="color : red;">전시가 종료되어 관람 할 수 없습니다.</div>
+            <h3>{{article.title}}</h3>
+            <hr>
+            <p>{{article.name}}</p>
+            <p>가격 : {{article.price}} </p>
+              <hr>
+            </li>
+        </div>
+    </ul>
+  </div>
+
+  <script>
+  const {createApp, ref, computed, watch} = Vue
+    const app = createApp({
+      setup() {
+        const openArticle = ref(false)
+        // const selected = ref(false)
+        const all = ref([
+          {
+            title : '무라카미 다카시 : 무라카시좀비',
+            name : '부산 시립 미술관',
+            price :1000,
+            isOpen : true,
+            isSelected : false
+          },
+          {
+            title : '마우라치오 카텔란 개인전',
+            name : '리움 미술관',
+            price :30000,
+            isOpen : true,
+            isSelected : false
+
+          },
+          {
+            title : '조선백자전',
+            name : '리움 미술관',
+            price :30000,
+            isOpen : true,
+            isSelected : false
+
+          },
+          {
+            title : '한국 실험미술 1960 - 1970',
+            name : '국립현대미술관',
+            price :0,
+            isOpen : true,
+            isSelected : false
+
+          },
+          {
+            title : '에드워드 호퍼 : 길 위에서',
+            name : '서울 시립 미술관',
+            price :1000,
+            isOpen : false,
+            isSelected : false
+
+          },
+          {
+            title : '알렉산더 칼더 x 이우환',
+            name : '국제갤러리 서울점',
+            price :15000,
+            isOpen : false,
+            isSelected : false
+
+          }
+        ])
+        const onOff = function() {
+          openArticle.value = !openArticle.value
+        }
+        const selectedInfos = ref([])
+        const totalPrice = ref(0)
+
+        watch(all, (newInfo) => {
+          selectedInfos.value = []
+          totalPrice.value = 0
+          const filterdInfos = newInfo.filter(info => info.isSelected)
+          filterdInfos.forEach(info => {
+            console.log(info.title);
+            selectedInfos.value.push(info.title)
+            totalPrice.value += info.price 
+          })
+        }, {deep : true})
+        const setcolor = function(price, selected) {
+          if (price <= 5000 && !selected) {
+            return "cheap"
+          }else if (price >=20000 && !selected) {
+            return "expensive"
+          }else if (selected){
+            return 'selected'
+          }
+        }
+        const isActiveExhibition = computed(() => {
+          if (openArticle.value) {
+            return all.value.filter(article => article.isOpen)
+          }else {
+            return all.value
+          }
+        })
+        return {
+          all,
+          isActiveExhibition,
+          openArticle,
+          onOff,
+          setcolor,
+          selectedInfos,
+          totalPrice
+        }
+      }
+    }).mount('#app')
+
+  </script>
+</body>
+</html>
